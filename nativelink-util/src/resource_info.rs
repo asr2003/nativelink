@@ -105,7 +105,7 @@ impl<'a> ResourceInfo<'a> {
             &mut end_bytes_processed,
         )
         .err_tip(|| format!("{ERROR_MSG} in {resource_name}"))?;
-        // Default digest_function to sha256 if not set
+        // Default digest_function to "sha256" if not set
         if output.digest_function.is_none() {
             output.digest_function = Some(Cow::Borrowed("sha256"));
         }
