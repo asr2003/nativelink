@@ -243,7 +243,7 @@ impl GrpcStore {
 
     fn get_read_request(&self, mut request: ReadRequest) -> Result<ReadRequest, Error> {
         const IS_UPLOAD_FALSE: bool = false;
-        let resource_info = ResourceInfo::new(&request.resource_name, IS_UPLOAD_FALSE)?;
+        let mut resource_info = ResourceInfo::new(&request.resource_name, IS_UPLOAD_FALSE)?;
         if resource_info.instance_name != self.instance_name {
             resource_info.instance_name = Cow::Borrowed(&self.instance_name);
             request.resource_name = resource_info.to_string(IS_UPLOAD_FALSE);
@@ -280,7 +280,7 @@ impl GrpcStore {
 
         let request = self.get_read_request(grpc_request.into_request().into_inner())?;
         let resource_name = &request.resource_name;
-        let mut resource_info = ResourceInfo::new(resource_name, IS_UPLOAD_FALSE)
+        let resource_info = ResourceInfo::new(resource_name, IS_UPLOAD_FALSE)
             .err_tip(|| "Failed to parse resource_name in GrpcStore::read")?;
 
         let digest_function = resource_info.digest_function.as_deref().unwrap_or("sha256");
