@@ -105,7 +105,6 @@ impl<'a> ResourceInfo<'a> {
             &mut end_bytes_processed,
         )
         .err_tip(|| format!("{ERROR_MSG} in {resource_name}"))?;
-
         error_if!(
             end_state != State::OptionalMetadata,
             "Expected the final state to be OptionalMetadata. Got: {end_state:?} for {resource_name} is_upload: {is_upload}"
