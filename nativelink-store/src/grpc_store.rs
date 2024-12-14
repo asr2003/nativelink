@@ -243,7 +243,7 @@ impl GrpcStore {
 
     fn get_read_request(&self, mut request: ReadRequest) -> Result<ReadRequest, Error> {
         const IS_UPLOAD_FALSE: bool = false;
-        let mut resource_info = ResourceInfo::new(&request.resource_name, IS_UPLOAD_FALSE)?;
+        let resource_info = ResourceInfo::new(&request.resource_name, IS_UPLOAD_FALSE)?;
         if resource_info.instance_name != self.instance_name {
             resource_info.instance_name = Cow::Borrowed(&self.instance_name);
             request.resource_name = resource_info.to_string(IS_UPLOAD_FALSE);
