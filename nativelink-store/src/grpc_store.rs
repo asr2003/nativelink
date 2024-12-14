@@ -280,7 +280,6 @@ impl GrpcStore {
 
         let request = self.get_read_request(grpc_request.into_request().into_inner())?;
         let resource_name = &request.resource_name;
-        
         let mut resource_info = ResourceInfo::new(resource_name, IS_UPLOAD_FALSE)
             .err_tip(|| "Failed to parse resource_name in GrpcStore::read")?;
 
