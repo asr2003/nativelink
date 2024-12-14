@@ -184,7 +184,7 @@ impl<'a> ResourceInfo<'a> {
                     .map_or("blobs", |_| "compressed-blobs"),
             ),
             self.compressor.as_ref().map(AsRef::as_ref),
-            self.digest_function.as_ref(),
+            self.digest_function.as_ref().map(AsRef::as_ref),
             Some(self.hash.as_ref()),
             Some(self.size.as_ref()),
             self.optional_metadata.as_ref().map(AsRef::as_ref),
