@@ -15,11 +15,12 @@
 use std::sync::Arc;
 use tonic::Request;
 
-use nativelink_store::grpc_store::GrpcStore;
-use nativelink_config::stores::{GrpcSpec, StoreType, GrpcEndpoint, Retry};
+use nativelink_config::stores::{GrpcEndpoint, GrpcSpec, Retry, StoreType};
 use nativelink_proto::google::bytestream::ReadRequest;
+use nativelink_store::grpc_store::GrpcStore;
 use nativelink_util::resource_info::is_supported_digest_function;
 use nativelink_util::store_trait::StoreDriver;
+use pretty_assertions::assert_eq;
 
 /// Build a minimal GrpcStore for testing.
 async fn make_store() -> Arc<GrpcStore> {
@@ -47,7 +48,7 @@ async fn make_store() -> Arc<GrpcStore> {
 async fn read_rejects_unsupported_md5() {
     let store = make_store().await;
 
-    let bad_name = format!("{}/blobs/AAA/123?digest=md5", store.instance_name());
+    let bad_name = "test/blobs/AAA/123?digest=md5".to_string();
     let req = ReadRequest {
         resource_name: bad_name,
         read_offset: 0,
@@ -55,7 +56,7 @@ async fn read_rejects_unsupported_md5() {
     };
 
     let res = store.read(Request::new(req)).await;
-    assert!(res.is_err(), "expected Err, got {:?}", res.ok());
+    assert!(res.is_err(), "expected Err");
     let err = res.err().unwrap().to_string();
     assert!(
         err.contains("Unsupported digest_function: md5"),
@@ -69,5 +70,9 @@ async fn has_with_results_succeeds_by_default() {
     let store = make_store().await;
     let mut results = Vec::<Option<u64>>::new();
 
-    store.has_with_results(&[], &mut results).await.unwrap();
+    store
+        .as_ref()
+        .has_with_results(&[], &mut results)
+        .await
+        .unwrap();
 }
