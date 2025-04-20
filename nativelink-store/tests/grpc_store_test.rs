@@ -22,6 +22,8 @@ use nativelink_util::resource_info::is_supported_digest_function;
 use nativelink_util::store_trait::StoreDriver;
 use pretty_assertions::assert_eq;
 
+use nativelink_util::store_trait::StoreLike;
+
 /// Build a minimal GrpcStore for testing.
 async fn make_store() -> Arc<GrpcStore> {
     let spec = GrpcSpec {
