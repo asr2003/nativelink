@@ -15,7 +15,7 @@
 use std::sync::Arc;
 use tonic::Request;
 
-use nativelink_store::GrpcStore;
+use nativelink_store::grpc_store::GrpcStore;
 use nativelink_config::stores::{GrpcSpec, StoreType, GrpcEndpoint, Retry};
 use nativelink_proto::google::bytestream::ReadRequest;
 use nativelink_util::resource_info::is_supported_digest_function;
