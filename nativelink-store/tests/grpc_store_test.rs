@@ -44,7 +44,7 @@ async fn grpc_store_read_fails_on_unsupported_digest_function() -> Result<(), Er
         ..Default::default()
     };
 
-    let result = store.read(Request::new(request)).await;
+    let result = store.read(request).await;
 
     match result {
         Err(e) => {
