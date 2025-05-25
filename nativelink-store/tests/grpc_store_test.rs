@@ -26,7 +26,7 @@ fn test_is_supported_digest_function() {
 #[test]
 fn test_read_rejects_invalid_digest_function() -> Result<(), Box<dyn core::error::Error>> {
     const RESOURCE_NAME: &str = "instance_name/blobs/sha256/0123456789abcdef0123456789abcdef/123";
-    let mut  resource_info = ResourceInfo::new(RESOURCE_NAME, false)?;
+    let mut resource_info = ResourceInfo::new(RESOURCE_NAME, false)?;
     resource_info.digest_function = Some("sha3".into());
     let digest_func = resource_info.digest_function.clone().unwrap();
 
