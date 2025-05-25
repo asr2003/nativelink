@@ -1,5 +1,5 @@
-use std::convert::TryFrom;
-use std::pin::Pin;
+use core::convert::TryFrom;
+use core::pin::Pin;
 
 use nativelink_config::stores::{GrpcEndpoint, GrpcSpec, Retry, StoreType};
 use nativelink_error::Error;
