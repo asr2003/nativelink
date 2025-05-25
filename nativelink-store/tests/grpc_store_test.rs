@@ -1,6 +1,5 @@
 use std::convert::TryFrom;
 use std::pin::Pin;
-use std::str::FromStr;
 
 use nativelink_config::stores::GrpcEndpoint;
 use nativelink_config::stores::{GrpcSpec, Retry, StoreType};
@@ -20,7 +19,7 @@ fn minimal_grpc_spec() -> GrpcSpec {
         instance_name: "instance".to_string(),
         store_type: StoreType::Cas,
         endpoints: vec![GrpcEndpoint {
-            uri: "http://localhost:1234".to_string(),
+            address: "http://localhost:1234".to_string(),
             ..Default::default()
         }],
         retry: Retry {
@@ -46,12 +45,16 @@ async fn grpc_store_read_fails_on_unsupported_digest_function() -> Result<(), Er
 
     let result = store.read(Request::new(request)).await;
 
-    assert!(result.is_err());
-    let err_msg = result.unwrap_err().to_string();
-    assert!(
-        err_msg.contains("Unsupported digest_function"),
-        "Unexpected error message: {err_msg}"
-    );
+    match result {
+        Err(e) => {
+            let err_msg = e.to_string();
+            assert!(
+                err_msg.contains("Unsupported digest_function"),
+                "Unexpected error message: {err_msg}"
+            );
+        }
+        Ok(_) => panic!("Expected error for unsupported digest_function, but got Ok"),
+    }
 
     Ok(())
 }
