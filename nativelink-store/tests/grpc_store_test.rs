@@ -28,10 +28,10 @@ fn test_is_supported_digest_function() {
 #[test]
 fn test_read_rejects_invalid_digest_function() {
     let resource_name = format!("instance/blobs/crc32/{}/100", VALID_HASH);
-    let info = ResourceInfo::new(resource_name, false).unwrap();
+    let info = ResourceInfo::new(&resource_name, false).unwrap();
     let digest_func = info.digest_function.unwrap_or_else(|| "sha256".into());
 
-    let result = GrpcStore::validate_digest_function(&digest_func, Some(resource_name));
+    let result = GrpcStore::validate_digest_function(&digest_func, Some(&resource_name));
     assert!(result.is_err(), "Expected error on invalid digest_function");
     let msg = result.unwrap_err().to_string();
     assert!(
