@@ -4,7 +4,7 @@ use core::convert::TryFrom;
 use nativelink_error::{Error, make_input_err};
 use nativelink_util::digest_hasher::{DigestHasherFunc, default_digest_hasher_func};
 use nativelink_util::resource_info::{ResourceInfo, is_supported_digest_function};
-use opentelemetry::context::Context
+use opentelemetry::context::Context;
 
 /// A minimal mock that tests only digest logic.
 struct MockGrpcStore {
