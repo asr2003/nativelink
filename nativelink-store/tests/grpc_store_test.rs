@@ -1,8 +1,7 @@
 use std::convert::TryFrom;
 use std::pin::Pin;
 
-use nativelink_config::stores::GrpcEndpoint;
-use nativelink_config::stores::{GrpcSpec, Retry, StoreType};
+use nativelink_config::stores::{GrpcEndpoint, GrpcSpec, Retry, StoreType};
 use nativelink_error::Error;
 use nativelink_macro::nativelink_test;
 use nativelink_proto::google::bytestream::ReadRequest;
@@ -12,7 +11,6 @@ use nativelink_util::digest_hasher::DigestHasherFunc;
 use nativelink_util::resource_info::is_supported_digest_function;
 use nativelink_util::store_trait::{StoreKey, StoreLike};
 use opentelemetry::context::Context;
-use tonic::Request;
 
 fn minimal_grpc_spec() -> GrpcSpec {
     GrpcSpec {
