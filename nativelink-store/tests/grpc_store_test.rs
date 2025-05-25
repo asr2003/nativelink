@@ -20,7 +20,8 @@ fn minimal_grpc_spec() -> GrpcSpec {
         store_type: StoreType::Cas,
         endpoints: vec![GrpcEndpoint {
             address: "http://localhost:1234".to_string(),
-            ..Default::default()
+            tls_config: None,
+            concurrency_limit: None,
         }],
         retry: Retry {
             max_retries: 0,
