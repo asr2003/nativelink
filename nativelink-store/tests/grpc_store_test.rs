@@ -1,17 +1,12 @@
+use std::sync::Arc;
 use core::convert::TryFrom;
-use core::pin::Pin;
 
-use nativelink_config::stores::{GrpcEndpoint, GrpcSpec, Retry, StoreType};
-use nativelink_error::Error;
-use nativelink_proto::google::bytestream::ReadRequest;
-use nativelink_store::grpc_store::GrpcStore;
-use nativelink_util::common::DigestInfo;
-use nativelink_util::digest_hasher::DigestHasherFunc;
-use nativelink_util::resource_info::is_supported_digest_function;
-use nativelink_util::store_trait::{StoreKey, StoreLike};
-use opentelemetry::context::Context;
+use nativelink_error::{Error, make_input_err};
+use nativelink_util::digest_hasher::{DigestHasherFunc, default_digest_hasher_func};
+use nativelink_util::resource_info::{ResourceInfo, is_supported_digest_function};
+use opentelemetry::context::Context
 
-/// A minimal mock that tests only digest rejection logic.
+/// A minimal mock that tests only digest logic.
 struct MockGrpcStore {
     instance_name: String,
 }
@@ -39,10 +34,7 @@ impl MockGrpcStore {
     fn check_has_with_results_digest(&self) -> Result<(), Error> {
         let digest_func = Context::current()
             .get::<DigestHasherFunc>()
-            .map_or_else(
-                nativelink_util::digest_hasher::default_digest_hasher_func,
-                |v| *v,
-            )
+            .map_or_else(default_digest_hasher_func, |v| *v)
             .to_string();
 
         if !is_supported_digest_function(&digest_func) {
