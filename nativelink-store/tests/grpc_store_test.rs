@@ -4,6 +4,8 @@ use nativelink_store::grpc_store::GrpcStore;
 use nativelink_util::resource_info::{ResourceInfo, is_supported_digest_function};
 use opentelemetry::context::Context;
 
+const VALID_HASH: &str = "0123456789abcdef000000000000000000010000000000000123456789abcdef";
+
 #[test]
 fn test_is_supported_digest_function() {
     assert!(is_supported_digest_function("sha256"));
@@ -13,7 +15,7 @@ fn test_is_supported_digest_function() {
 
 #[test]
 fn test_read_rejects_invalid_digest_function() {
-    let resource_name = "instance/blobs/crc32/abc123/100";
+    let resource_name = format!("instance/blobs/crc32/{}/100", VALID_HASH1);
     let info = ResourceInfo::new(resource_name, false).unwrap();
     let digest_func = info.digest_function.unwrap_or_else(|| "sha256".into());
 
