@@ -516,7 +516,7 @@ impl GrpcStore {
             .map(|_| ())
     }
 
-    pub(crate) fn validate_digest_function(
+    pub fn validate_digest_function(
         digest_function: &str,
         resource_name: Option<&str>,
     ) -> Result<(), Error> {
