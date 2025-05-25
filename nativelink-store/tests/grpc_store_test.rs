@@ -24,13 +24,14 @@ fn test_is_supported_digest_function() {
 }
 
 #[test]
-fn test_read_rejects_invalid_digest_function() {
-    let resource_name =
-        "instance/blobs/crc32/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/123";
-    let info = ResourceInfo::new(&resource_name, false).unwrap();
-    let digest_func = info.digest_function.unwrap_or_else(|| "sha256".into());
+fn test_read_rejects_invalid_digest_function() -> Result<(), Box<dyn core::error::Error>> {
+    const RESOURCE_NAME: &str = "instance_name/blobs/crc32/hash/12345";
+    let resource_info = ResourceInfo::new(RESOURCE_NAME, false)?;
+    let digest_func = resource_info
+        .digest_function
+        .unwrap_or_else(|| "sha256".into());
 
-    let result = GrpcStore::validate_digest_function(&digest_func, Some(&resource_name));
+    let result = GrpcStore::validate_digest_function(&digest_func, Some(RESOURCE_NAME));
     assert!(result.is_err(), "Expected error on invalid digest_function");
     let msg = result.unwrap_err().to_string();
     assert!(
@@ -38,6 +39,7 @@ fn test_read_rejects_invalid_digest_function() {
         "Unexpected error: {}",
         msg
     );
+    Ok(())
 }
 
 #[test]
