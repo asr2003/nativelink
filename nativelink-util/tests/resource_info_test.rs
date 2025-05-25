@@ -709,7 +709,7 @@ async fn write_invalid_size_test() -> Result<(), Box<dyn core::error::Error>> {
 }
 
 #[nativelink_test]
-async fn test_supported_digest_functions() -> Result<(), Box<dyn std::error::Error>> {
+async fn test_supported_digest_functions() -> Result<(), Box<dyn core::error::Error>> {
     assert_eq!(is_supported_digest_function("sha256"), true);
     assert_eq!(is_supported_digest_function("sha1"), true);
     assert_eq!(is_supported_digest_function("md5"), true);
@@ -724,7 +724,7 @@ async fn test_supported_digest_functions() -> Result<(), Box<dyn std::error::Err
 }
 
 #[nativelink_test]
-async fn test_unsupported_digest_functions() -> Result<(), Box<dyn std::error::Error>> {
+async fn test_unsupported_digest_functions() -> Result<(), Box<dyn core::error::Error>> {
     assert_eq!(is_supported_digest_function("sha3"), false);
     assert_eq!(
         is_supported_digest_function("invalid_digest_function"),
