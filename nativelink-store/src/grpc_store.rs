@@ -287,7 +287,7 @@ impl GrpcStore {
 
         let digest_function = resource_info.digest_function.as_deref().unwrap_or("sha256");
 
-        GrpcStore::validate_digest_function(digest_function, Some(resource_name))?;
+        Self::validate_digest_function(digest_function, Some(resource_name))?;
 
         error_if!(
             matches!(self.store_type, nativelink_config::stores::StoreType::Ac),
@@ -525,8 +525,8 @@ impl GrpcStore {
                 "Unsupported digest_function: {}{}",
                 digest_function,
                 match resource_name {
-                    Some(name) => format!(" in resource_name '{}'", name),
-                    None => "".to_string(),
+                    Some(name) => format!(" in resource_name '{name}'"),
+                    None => String::new(),
                 }
             ));
         }
