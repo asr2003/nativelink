@@ -287,7 +287,7 @@ impl GrpcStore {
 
         let digest_function = resource_info.digest_function.as_deref().unwrap_or("sha256");
 
-        self.validate_digest_function(digest_function, Some(resource_name))?;
+        GrpcStore::validate_digest_function(digest_function, Some(resource_name))?;
 
         error_if!(
             matches!(self.store_type, nativelink_config::stores::StoreType::Ac),
@@ -547,7 +547,7 @@ impl StoreDriver for GrpcStore {
             .get::<DigestHasherFunc>()
             .map_or_else(default_digest_hasher_func, |v| *v)
             .to_string();
-        self.validate_digest_function(&digest_function, None)?;
+        GrpcStore::validate_digest_function(&digest_function, None)?;
 
         if matches!(self.store_type, nativelink_config::stores::StoreType::Ac) {
             keys.iter()
