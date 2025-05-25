@@ -25,7 +25,8 @@ fn test_is_supported_digest_function() {
 
 #[test]
 fn test_read_rejects_invalid_digest_function() -> Result<(), Box<dyn core::error::Error>> {
-    const RESOURCE_NAME: &str = "instance_name/blobs/crc32/hash/12345";
+    const RESOURCE_NAME: &str =
+        "instance/blobs/crc32/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/123";
     let resource_info = ResourceInfo::new(RESOURCE_NAME, false)?;
     let digest_func = resource_info
         .digest_function
