@@ -287,13 +287,7 @@ impl GrpcStore {
 
         let digest_function = resource_info.digest_function.as_deref().unwrap_or("sha256");
 
-        if !is_supported_digest_function(digest_function) {
-            return Err(make_input_err!(
-                "Unsupported digest_function: {} in resource_name '{}'",
-                digest_function,
-                resource_name
-            ));
-        }
+        self.validate_digest_function(digest_function, Some(resource_name))?;
 
         error_if!(
             matches!(self.store_type, nativelink_config::stores::StoreType::Ac),
@@ -521,6 +515,23 @@ impl GrpcStore {
             .await
             .map(|_| ())
     }
+
+    pub(crate) fn validate_digest_function(
+        digest_function: &str,
+        resource_name: Option<&str>,
+    ) -> Result<(), Error> {
+        if !is_supported_digest_function(digest_function) {
+            return Err(make_input_err!(
+                "Unsupported digest_function: {}{}",
+                digest_function,
+                match resource_name {
+                    Some(name) => format!(" in resource_name '{}'", name),
+                    None => "".to_string(),
+                }
+            ));
+        }
+        Ok(())
+    }
 }
 
 #[async_trait]
@@ -536,13 +547,7 @@ impl StoreDriver for GrpcStore {
             .get::<DigestHasherFunc>()
             .map_or_else(default_digest_hasher_func, |v| *v)
             .to_string();
-
-        if !is_supported_digest_function(&digest_function) {
-            return Err(make_input_err!(
-                "Unsupported digest_function: {}",
-                digest_function
-            ));
-        }
+        self.validate_digest_function(&digest_function, None)?;
 
         if matches!(self.store_type, nativelink_config::stores::StoreType::Ac) {
             keys.iter()
