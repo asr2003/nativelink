@@ -11,7 +11,6 @@ use nativelink_util::common::DigestInfo;
 use nativelink_util::digest_hasher::DigestHasherFunc;
 use nativelink_util::resource_info::is_supported_digest_function;
 use nativelink_util::store_trait::{StoreKey, StoreLike};
-
 use opentelemetry::context::Context;
 use tonic::Request;
 
