@@ -9,12 +9,12 @@ use nativelink_macro::nativelink_test;
 use nativelink_proto::google::bytestream::ReadRequest;
 use nativelink_store::grpc_store::GrpcStore;
 use nativelink_util::common::DigestInfo;
-use nativelink_util::digest_hasher::ACTIVE_HASHER_FUNC;
 use nativelink_util::digest_hasher::{DigestHasherFunc, default_digest_hasher_func};
-use nativelink_util::origin_context::ActiveOriginContext;
 use nativelink_util::resource_info::is_supported_digest_function;
 use nativelink_util::store_trait::StoreKey;
 use std::pin::Pin;
+
+use opentelemetry::context::Context;
 
 fn minimal_grpc_spec() -> GrpcSpec {
     GrpcSpec {
@@ -66,11 +66,8 @@ async fn grpc_store_has_with_results_fails_on_unsupported_context_digest() -> Re
     let mut results = vec![None];
     let key: StoreKey = digest.into();
 
-    let _ctx = ActiveOriginContext::enter();
-    ActiveOriginContext::insert(
-        &ACTIVE_HASHER_FUNC,
-        Some(DigestHasherFunc::from_str("sha3_256").unwrap()),
-    );
+    let test_ctx = Context::current().with_value(DigestHasherFunc::from_str("sha3_256").unwrap());
+    let _guard = test_ctx.attach();
 
     let result = Pin::new(&store)
         .has_with_results(&[key], &mut results)

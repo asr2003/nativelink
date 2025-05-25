@@ -532,8 +532,8 @@ impl StoreDriver for GrpcStore {
         keys: &[StoreKey<'_>],
         results: &mut [Option<u64>],
     ) -> Result<(), Error> {
-        let digest_function = ActiveOriginContext::get_value(&ACTIVE_HASHER_FUNC)
-            .err_tip(|| "In GrpcStore::has_with_results")?
+        let digest_function = Context::current()
+            .get::<DigestHasherFunc>()
             .map_or_else(default_digest_hasher_func, |v| *v)
             .to_string();
 
