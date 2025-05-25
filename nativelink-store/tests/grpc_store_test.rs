@@ -1,5 +1,5 @@
-use std::sync::Arc;
 use core::convert::TryFrom;
+use std::sync::Arc;
 
 use nativelink_error::{Error, make_input_err};
 use nativelink_util::digest_hasher::{DigestHasherFunc, default_digest_hasher_func};
