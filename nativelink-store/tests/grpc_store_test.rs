@@ -25,7 +25,8 @@ fn test_is_supported_digest_function() {
 
 #[test]
 fn test_read_rejects_invalid_digest_function() {
-    let resource_name = "instance/blobs/crc32/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/123";
+    let resource_name =
+        "instance/blobs/crc32/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef/123";
     let info = ResourceInfo::new(&resource_name, false).unwrap();
     let digest_func = info.digest_function.unwrap_or_else(|| "sha256".into());
 
