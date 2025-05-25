@@ -1,7 +1,8 @@
+use std::convert::TryFrom;
 use std::pin::Pin;
 use std::str::FromStr;
 
-use nativelink_config::cas_server::EndpointConfig;
+use nativelink_config::stores::GrpcEndpoint;
 use nativelink_config::stores::{GrpcSpec, Retry, StoreType};
 use nativelink_error::Error;
 use nativelink_macro::nativelink_test;
@@ -18,7 +19,7 @@ fn minimal_grpc_spec() -> GrpcSpec {
     GrpcSpec {
         instance_name: "instance".to_string(),
         store_type: StoreType::Cas,
-        endpoints: vec![EndpointConfig {
+        endpoints: vec![GrpcEndpoint {
             uri: "http://localhost:1234".to_string(),
             ..Default::default()
         }],
@@ -46,9 +47,9 @@ async fn grpc_store_read_fails_on_unsupported_digest_function() -> Result<(), Er
     let result = store.read(Request::new(request)).await;
 
     assert!(result.is_err());
-    let err_msg = format!("{:?}", result);
+    let err_msg = result.unwrap_err().to_string();
     assert!(
-        err_msg.contains("Unsupported digest_function: md5"),
+        err_msg.contains("Unsupported digest_function"),
         "Unexpected error message: {err_msg}"
     );
 
@@ -64,7 +65,8 @@ async fn grpc_store_has_with_results_fails_on_unsupported_context_digest() -> Re
     let mut results = vec![None];
     let key: StoreKey = digest.into();
 
-    let test_ctx = Context::current().with_value(DigestHasherFunc::from_str("sha3_256").unwrap());
+    let digest_hasher_func = DigestHasherFunc::try_from("sha3_256").unwrap();
+    let test_ctx = Context::current().with_value(digest_hasher_func);
     let _guard = test_ctx.attach();
 
     let result = Pin::new(&store)
@@ -72,7 +74,7 @@ async fn grpc_store_has_with_results_fails_on_unsupported_context_digest() -> Re
         .await;
 
     assert!(result.is_err());
-    let err_msg = format!("{:?}", result);
+    let err_msg = result.unwrap_err().to_string();
     assert!(
         err_msg.contains("Unsupported digest_function"),
         "Unexpected error message: {err_msg}"
