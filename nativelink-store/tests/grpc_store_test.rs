@@ -1,20 +1,19 @@
-use core::time::Duration;
-use std::sync::Arc;
+use std::pin::Pin;
+use std::str::FromStr;
 
-use aws_smithy_runtime::client::http::test_util::StaticReplayClient;
-use http::StatusCode;
-use nativelink_config::stores::{EndpointConfig, GrpcSpec, Retry, StoreType};
-use nativelink_error::{Error, ResultExt, make_input_err};
+use nativelink_config::cas_server::EndpointConfig;
+use nativelink_config::stores::{GrpcSpec, Retry, StoreType};
+use nativelink_error::Error;
 use nativelink_macro::nativelink_test;
 use nativelink_proto::google::bytestream::ReadRequest;
 use nativelink_store::grpc_store::GrpcStore;
 use nativelink_util::common::DigestInfo;
-use nativelink_util::digest_hasher::{DigestHasherFunc, default_digest_hasher_func};
+use nativelink_util::digest_hasher::DigestHasherFunc;
 use nativelink_util::resource_info::is_supported_digest_function;
-use nativelink_util::store_trait::StoreKey;
-use std::pin::Pin;
+use nativelink_util::store_trait::{StoreKey, StoreLike};
 
 use opentelemetry::context::Context;
+use tonic::Request;
 
 fn minimal_grpc_spec() -> GrpcSpec {
     GrpcSpec {
