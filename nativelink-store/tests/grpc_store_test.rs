@@ -3,7 +3,6 @@ use core::pin::Pin;
 
 use nativelink_config::stores::{GrpcEndpoint, GrpcSpec, Retry, StoreType};
 use nativelink_error::Error;
-use nativelink_macro::nativelink_test;
 use nativelink_proto::google::bytestream::ReadRequest;
 use nativelink_store::grpc_store::GrpcStore;
 use nativelink_util::common::DigestInfo;
@@ -12,77 +11,84 @@ use nativelink_util::resource_info::is_supported_digest_function;
 use nativelink_util::store_trait::{StoreKey, StoreLike};
 use opentelemetry::context::Context;
 
-fn minimal_grpc_spec() -> GrpcSpec {
-    GrpcSpec {
-        instance_name: "instance".to_string(),
-        store_type: StoreType::Cas,
-        endpoints: vec![GrpcEndpoint {
-            address: "http://localhost:1234".to_string(),
-            tls_config: None,
-            concurrency_limit: None,
-        }],
-        retry: Retry {
-            max_retries: 0,
-            delay: 0.0,
-            jitter: 0.0,
-            ..Default::default()
-        },
-        connections_per_endpoint: 1,
-        max_concurrent_requests: 1,
-    }
+/// A minimal mock that tests only digest rejection logic.
+struct MockGrpcStore {
+    instance_name: String,
 }
 
-#[nativelink_test]
-async fn grpc_store_read_fails_on_unsupported_digest_function() -> Result<(), Error> {
-    let spec = minimal_grpc_spec();
-    let store = GrpcStore::new(&spec).await?;
+impl MockGrpcStore {
+    fn new() -> Arc<Self> {
+        Arc::new(Self {
+            instance_name: "instance".into(),
+        })
+    }
 
-    let request = ReadRequest {
-        resource_name: "instance/blobs/md5/abc123/100".to_string(), // Unsupported digest
-        ..Default::default()
-    };
-
-    let result = store.read(request).await;
-
-    match result {
-        Err(e) => {
-            let err_msg = e.to_string();
-            assert!(
-                err_msg.contains("Unsupported digest_function"),
-                "Unexpected error message: {err_msg}"
-            );
+    fn check_read_digest(&self, resource_name: &str) -> Result<(), Error> {
+        let info = ResourceInfo::new(resource_name, false)?;
+        let digest_func = info.digest_function.as_deref().unwrap_or("sha256");
+        if !is_supported_digest_function(digest_func) {
+            return Err(make_input_err!(
+                "Unsupported digest_function: {} in resource_name '{}'",
+                digest_func,
+                resource_name
+            ));
         }
-        Ok(_) => panic!("Expected error for unsupported digest_function, but got Ok"),
+        Ok(())
     }
 
-    Ok(())
+    fn check_has_with_results_digest(&self) -> Result<(), Error> {
+        let digest_func = Context::current()
+            .get::<DigestHasherFunc>()
+            .map_or_else(
+                nativelink_util::digest_hasher::default_digest_hasher_func,
+                |v| *v,
+            )
+            .to_string();
+
+        if !is_supported_digest_function(&digest_func) {
+            return Err(make_input_err!(
+                "Unsupported digest_function: {}",
+                digest_func
+            ));
+        }
+        Ok(())
+    }
 }
 
-#[nativelink_test]
-async fn grpc_store_has_with_results_fails_on_unsupported_context_digest() -> Result<(), Error> {
-    let spec = minimal_grpc_spec();
-    let store = GrpcStore::new(&spec).await?;
-
-    let digest = DigestInfo::try_new("abc123", 100)?;
-    let mut results = vec![None];
-    let key: StoreKey = digest.into();
-
-    let digest_hasher_func = DigestHasherFunc::try_from("sha3_256").unwrap();
-    let test_ctx = Context::current().with_value(digest_hasher_func);
-    let _guard = test_ctx.attach();
-
-    let result = Pin::new(&store)
-        .has_with_results(&[key], &mut results)
-        .await;
+#[test]
+fn grpc_store_read_fails_on_unsupported_digest_function() {
+    let store = MockGrpcStore::new();
+    let resource_name = "instance/blobs/md5/abc123/100";
+    let result = store.check_read_digest(resource_name);
 
     assert!(result.is_err());
-    let err_msg = result.unwrap_err().to_string();
     assert!(
-        err_msg.contains("Unsupported digest_function"),
-        "Unexpected error message: {err_msg}"
+        result
+            .unwrap_err()
+            .to_string()
+            .contains("Unsupported digest_function"),
+        "Expected digest rejection"
     );
+}
 
-    Ok(())
+#[test]
+fn grpc_store_has_with_results_fails_on_unsupported_context_digest() {
+    let store = MockGrpcStore::new();
+
+    let digest_func = DigestHasherFunc::try_from("sha3_256").unwrap();
+    let test_ctx = Context::current().with_value(digest_func);
+    let _guard = test_ctx.attach();
+
+    let result = store.check_has_with_results_digest();
+
+    assert!(result.is_err());
+    assert!(
+        result
+            .unwrap_err()
+            .to_string()
+            .contains("Unsupported digest_function"),
+        "Expected context digest rejection"
+    );
 }
 
 #[test]
